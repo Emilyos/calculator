@@ -2,25 +2,27 @@
 // Created by Emil Khshiboun on 21/03/2021.
 //
 
-#include "LexicalAnalyzer.h"
+#include "Analyzer.h"
 #include "sstream"
 #include "Expression.h"
-#include <iostream>
 #include <string>
 #include <stack>
-#include <map>
 
 #define IS_BINOP(c) (c == '+' || c == '-' || c == '/' || c =='*')
 
-
-
-LexicalAnalyzer::LexicalAnalyzer(const TerminalTokens &terminalTokens) {
+Analyzer::Analyzer(const TerminalTokens &terminalTokens) {
     this->terminalTokens = terminalTokens;
 }
 
-
-Assignment LexicalAnalyzer::lexAnalyze(const std::string &line_input) {
-    Assignment assignment = Assignment();
+/**
+ *  Lexical Analyzer - This is the first step in the analyzer,
+ *  The purpose of this function is to parse the given input into well-defined tokens
+ *  Note that this function does minimal effort in terms of syntax checking
+ * @param line_input Input line to be parsed as token
+ * @return TokenStream AKA list of Tokens
+ */
+TokenStream Analyzer::lexAnalyze(const std::string &line_input) {
+    TokenStream assignment = TokenStream();
     std::stringstream sstream(line_input);
     std::string next;
     while (sstream >> next) {
@@ -38,14 +40,22 @@ Assignment LexicalAnalyzer::lexAnalyze(const std::string &line_input) {
 }
 
 
-void LexicalAnalyzer::_getTokensFrom(const std::string &word, int start, std::vector<Token *> &buffer,
-                                     Token *last_token) {
+/**
+ * Helper function to the lexical analyzer, used to parse a signle trimed word
+ * This function is recursive.
+ * @param word The word to parse into token
+ * @param start the start index in the word
+ * @param buffer the buffer to write the tokens to.
+ * @param last_token this is helper parameter to keep track of the last inserted token by this specific function call.
+ */
+void Analyzer::_getTokensFrom(const std::string &word, int start, std::vector<Token *> &buffer,
+                              Token *last_token) {
     const auto len = word.length();
     if (start >= len) return;
     if (IS_TOKEN(last_token, EXP) && std::isalnum(word[start])) {
         throw LexicalAnalyzerException("Syntax Error! " + word);
     }
-    auto parser = [len, start, &word, &buffer](const std::string &chars, TokenType type, size_t &next_pos) {
+    auto parser = [len, start, &word](const std::string &chars, TokenType type, size_t &next_pos) {
         auto pos = word.find_first_not_of(chars, start);
         if (pos == std::string::npos) {
             pos = len;
@@ -101,15 +111,17 @@ void LexicalAnalyzer::_getTokensFrom(const std::string &word, int start, std::ve
     throw LexicalAnalyzerException("Syntax Error! " + word.substr(start));
 }
 
-
-void _buildBinaryExpression(Assignment &assignment, int start, int &end, bool mul_div) {
+/**
+ * Used as part of the symantic check
+ * This function reduces the rule Exp -> Exp BINOP Exp
+ * @param assignment
+ * @param start the start index in the assignement
+ * @param end the past-the-end index of the assignment
+ * @param mul_div used to determine
+ */
+void Analyzer::_buildBinaryExpression(Assignment &assignment, int start, int &end, const char ops[2]) {
     bool found_exp = false;
     int i = start;
-    char ops[2] = {'+', '-'};
-    if (mul_div) {
-        ops[0] = '*';
-        ops[1] = '/';
-    }
     while (i < end) {
         Token *token = assignment[i];
         if (IS_TOKEN(token, EXP)) {
@@ -140,7 +152,8 @@ void _buildBinaryExpression(Assignment &assignment, int start, int &end, bool mu
     }
 }
 
-void _buildExpressionWithoutParen(Assignment &assignment, int start, int end) {
+
+void Analyzer::_buildExpressionWithoutParen(Assignment &assignment, int start, int end) {
     // Convert ID/NUM tokens into Exp
     for (int i = start; i < end; i++) {
         Token *token = assignment[i];
@@ -153,41 +166,21 @@ void _buildExpressionWithoutParen(Assignment &assignment, int start, int end) {
     }
     // now we should be able to reduce Exp -> Exp BINOP Exp only.
     int tmp_end = end;
-    _buildBinaryExpression(assignment, start, tmp_end, true);
-    _buildBinaryExpression(assignment, start, tmp_end, false);
+    // start with higher precedences (mul & div)
+    char mul_div_ops[2] = {'*', '/'};
+    char add_sub_ops[2] = {'+', '-'};
+    _buildBinaryExpression(assignment, start, tmp_end, mul_div_ops);
+    // lower precedences (sub & add)
+    _buildBinaryExpression(assignment, start, tmp_end, add_sub_ops);
 }
 
-
-bool buildExpression(Assignment &assignment, int start, int end) {
-    unsigned int size = end - start;
-    if (size <= 0) return false;
-    Token *current = assignment[start];
-    if (size == 1) {
-        if (current->getType() == TokenType::EXP) {
-            return true;
-        } else if (current->getType() == TokenType::ID) {
-            //TODO change with exp
-            return true;
-        } else if (current->getType() == TokenType::NUM) {
-            //TODO change with exp
-            return true;
-        }
-        return false;
-    }
-
-    return false;
-}
-
-bool LexicalAnalyzer::syntaxCheck(Assignment &assignment) {
+void Analyzer::syntaxCheck(Assignment &assignment) {
     if (assignment.size() <= 2 || assignment[0]->getType() != ID || assignment[1]->getType() != ASSIGN) {
         throw LexicalAnalyzerException("Invalid assignment!");
     }
     _buildParenthesesIndex(assignment);
-    for (auto pair : parentheses) {
-        std::cout << pair.first << "," << pair.second << std::endl;
-    }
-    for (auto ritr = parentheses.rbegin(); ritr != parentheses.rend(); ritr++) {
-        int left = ritr->first;
+    for (auto ritr = left_parentheses.rbegin(); ritr != left_parentheses.rend(); ritr++) {
+        int left = *ritr;
         int right;
         for (right = left + 1; right < assignment.size(); right++) {
             if (IS_TOKEN(assignment[right], RPAREN)) break;
@@ -199,13 +192,15 @@ bool LexicalAnalyzer::syntaxCheck(Assignment &assignment) {
         assignment.erase(assignment.begin() + left + 1, assignment.begin() + left + 4);
 
     }
-
     _buildExpressionWithoutParen(assignment, 2, assignment.size());
-    return true;
 }
 
-void LexicalAnalyzer::_buildParenthesesIndex(const Assignment &assignment) {
-    parentheses.clear();
+/**
+ * Part of the syntax check, checks if the parentheses are balanced.
+ * @param assignment
+ */
+void Analyzer::_buildParenthesesIndex(const Assignment &assignment) {
+    left_parentheses.clear();
     int size = assignment.size();
     std::stack<int> Q{};
     for (int i = 0; i < size; i++) {
@@ -213,12 +208,12 @@ void LexicalAnalyzer::_buildParenthesesIndex(const Assignment &assignment) {
             Q.push(i);
         } else if (assignment[i]->getType() == TokenType::RPAREN) {
             if (Q.empty()) {
-                throw LexicalAnalyzerException("unbalanced parentheses!");
+                throw LexicalAnalyzerException("unbalanced left_parentheses!");
             }
             int left_paren = Q.top();
             Q.pop();
-            if (i - left_paren <= 1) throw LexicalAnalyzerException("Invalid parentheses!");
-            parentheses.insert(std::make_pair(left_paren, i));
+            if (i - left_paren <= 1) throw LexicalAnalyzerException("Invalid left_parentheses!");
+            left_parentheses.insert(left_paren);
         }
     }
 }

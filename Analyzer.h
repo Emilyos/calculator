@@ -2,21 +2,21 @@
 // Created by Emil Khshiboun on 21/03/2021.
 //
 
-#ifndef CALCULATOR_LEXICALANALYZER_H
-#define CALCULATOR_LEXICALANALYZER_H
+#ifndef CALCULATOR_ANALYZER_H
+#define CALCULATOR_ANALYZER_H
 
 #include "Token.h"
 #include <utility>
 #include <vector>
 #include <string>
 #include <exception>
-#include <map>
+#include <set>
 
 
+typedef std::vector<Token *> TokenStream;
 typedef std::vector<Token *> Assignment;
 typedef std::vector<Token> TerminalTokens;
-const std::string ALPHA = {"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"};
-const std::string DIGITS = {"0123456789"};
+
 
 class LexicalAnalyzerException : public std::exception {
     std::string message;
@@ -28,22 +28,30 @@ public:
     }
 };
 
-class LexicalAnalyzer {
+class Analyzer {
+private:
+    std::string ALPHA = {"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"};
+    std::string DIGITS = {"0123456789"};
     TerminalTokens terminalTokens;
-    std::map<int, int> parentheses;
+
+    std::set<int> left_parentheses;
 
     void _getTokensFrom(const std::string &, int, std::vector<Token *> &, Token * = nullptr);
 
     void _buildParenthesesIndex(const Assignment &);
 
+    void _buildBinaryExpression(Assignment &assignment, int start, int &end, const char ops[2]);
+
+    void _buildExpressionWithoutParen(Assignment &assignment, int start, int end);
+
 public :
-    explicit LexicalAnalyzer(const TerminalTokens &terminalTokens = TerminalTokens());
+    explicit Analyzer(const TerminalTokens &terminalTokens = TerminalTokens());
 
 
-    Assignment lexAnalyze(const std::string &line_input);
+    TokenStream lexAnalyze(const std::string &line_input);
 
-    bool syntaxCheck(Assignment &assignment);
+    void syntaxCheck(Assignment &assignment);
 
 };
 
-#endif //CALCULATOR_LEXICALANALYZER_H
+#endif //CALCULATOR_ANALYZER_H
