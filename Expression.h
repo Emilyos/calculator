@@ -25,7 +25,7 @@ class ExpressionException : public std::exception {
 public:
     explicit ExpressionException(const std::string &message = "") : message("ExpressionException: " + message) {}
 
-    const char *what() const _NOEXCEPT override {
+    const char *what() const noexcept override {
         return message.c_str();
     }
 };
@@ -46,7 +46,7 @@ public:
 
     explicit Expression(ExpTokens &tokens);
 
-    virtual ~Expression() = default;
+    virtual ~Expression();
 
     virtual int evaluate() {
         throw ExpressionException();

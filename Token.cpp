@@ -30,6 +30,9 @@ Token::~Token() {
             case ID:
                 delete (std::string *) data;
                 break;
+            case EXP:
+                delete (Expression *) data;
+                break;
             case NUM:
                 delete (int *) data;
                 break;

@@ -33,7 +33,6 @@ TokenStream Analyzer::lexAnalyze(const std::string &line_input) {
                 throw LexicalAnalyzerException("Syntax Error!");
             }
             assignment.push_back(token);
-            // std::cout << *token << std::endl;
         }
     }
     return assignment;
@@ -131,11 +130,11 @@ void Analyzer::_buildBinaryExpression(Assignment &assignment, int start, int &en
         } else if (!IS_TOKEN(token, BINOP) || !found_exp) {
             throw LexicalAnalyzerException("Syntax Error!");
         } else { // found BINARY OPERATOR
-            assert(token != NULL && !token->getId().empty());
+            // assert(token != NULL && !token->getId().empty());
             found_exp = false;
             const char op = token->getId()[0];
             if (op == ops[0] || op == ops[1]) {
-                assert(i - 1 >= start && IS_TOKEN(assignment[i - 1], EXP));
+                // assert(i - 1 >= start && IS_TOKEN(assignment[i - 1], EXP));
                 if ((i + 1) >= end || !IS_TOKEN(assignment[i + 1], EXP)) {
                     throw LexicalAnalyzerException("Syntax Error!");
                 }
@@ -187,7 +186,8 @@ void Analyzer::syntaxCheck(Assignment &assignment) {
         }
         if (right >= assignment.size()) throw LexicalAnalyzerException("Syntax Error!");
         _buildExpressionWithoutParen(assignment, left + 1, right);
-        auto new_token = ExpressionFactory::makeParenthesesExpressionToken(assignment[left + 1]);
+        auto new_token = ExpressionFactory::makeParenthesesExpressionToken(assignment[left], assignment[left + 1],
+                                                                           assignment[left + 2]);
         assignment.insert(assignment.begin() + left, new_token);
         assignment.erase(assignment.begin() + left + 1, assignment.begin() + left + 4);
 

@@ -1,3 +1,5 @@
 # Project exclude paths
 /cmake-build-debug/
 /edge_cases.txt
+.DS_Store
+.idea/

@@ -35,6 +35,8 @@ void Calculator::start() {
             if (next_assignment.empty()) continue;
             lexicalAnalyzer.syntaxCheck(next_assignment);
             processAssignment(next_assignment);
+            delete next_assignment[0];
+            delete next_assignment[2];
         } catch (exception &e) {
             no_error = false;
             std::cout << e.what() << std::endl;
@@ -69,9 +71,9 @@ void Calculator::printVariables() {
 }
 
 void Calculator::processAssignment(Assignment &assignment) {
-    assert(assignment.size() == 3 && (IS_TOKEN(assignment[0], ID)
-                                      && IS_TOKEN(assignment[1], ASSIGN) &&
-                                      IS_TOKEN(assignment[2], EXP)));
+    //assert(assignment.size() == 3 && (IS_TOKEN(assignment[0], ID)
+    //                                && IS_TOKEN(assignment[1], ASSIGN) &&
+    //                              IS_TOKEN(assignment[2], EXP)));
     auto var_name = *(std::string *) assignment[0]->getData();
     auto exp = (Expression *) assignment[2]->getData();
     auto assign_type = assignment[1]->getId();

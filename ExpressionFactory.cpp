@@ -51,11 +51,11 @@ Token *ExpressionFactory::makeBinOpExpressionToken(Token *lhs, Token *op, Token 
     return MakeExpToken(exp);
 }
 
-Token *ExpressionFactory::makeParenthesesExpressionToken(Token *token) {
+Token *ExpressionFactory::makeParenthesesExpressionToken(Token *leftParen, Token *token, Token *rightParen) {
     if (!IS_TOKEN(token, EXP)) {
         throw ExpressionFactoryException("Invalid arguments!");
     }
-    ExpTokens expTokens{token};
+    ExpTokens expTokens{leftParen, token, rightParen};
     auto exp = new ParenthesesExpression(expTokens);
     return MakeExpToken(exp);
 }

@@ -30,6 +30,15 @@ void Expression::setVariable(const std::string &var_name, int value) {
 //    Expression::var_map->insert(std::make_pair(var_name, value));
 }
 
+Expression::~Expression() {
+    for (auto token:tokensList) {
+        if (IS_TOKEN(token, ID) || IS_TOKEN(token, NUM) || IS_TOKEN(token, EXP)) {
+            delete token;
+        }
+    }
+    tokensList.clear();
+}
+
 
 IdExpression::IdExpression(ExpTokens &tokens) : Expression(tokens) {
     priority = Priorities::NUM_ID;
@@ -125,6 +134,6 @@ int UnaryExpression::evaluate() {
 }
 
 int ParenthesesExpression::evaluate() {
-    auto exp = (Expression *) tokensList[0]->getData();
+    auto exp = (Expression *) tokensList[1]->getData();
     return exp->evaluate();
 }

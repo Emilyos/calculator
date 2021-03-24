@@ -13,7 +13,7 @@ class ExpressionFactoryException : public std::exception {
 public:
     ExpressionFactoryException(const std::string &message = "") : message("ExpressionFactoryException" + message) {}
 
-    const char *what() const _NOEXCEPT override {
+    const char *what() const noexcept override {
         return message.c_str();
     }
 };
@@ -31,7 +31,7 @@ public:
 
     static Token *makeBinOpExpressionToken(Token *lhs, Token *op, Token *rhs);
 
-    static Token *makeParenthesesExpressionToken(Token *token);
+    static Token *makeParenthesesExpressionToken(Token *leftParen, Token *token, Token *rightParen);
 };
 
 

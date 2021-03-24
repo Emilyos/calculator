@@ -23,7 +23,7 @@ class LexicalAnalyzerException : public std::exception {
 public:
     explicit LexicalAnalyzerException(std::string error_message = "") : message(std::move(error_message)) {}
 
-    const char *what() const _NOEXCEPT override {
+    const char *what() const noexcept override {
         return message.c_str();
     }
 };
