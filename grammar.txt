@@ -1,0 +1,11 @@
+S -> Assignment
+Assignment -> ID ASSIGN Exp
+Exp -> LPAREN Exp RPAREN
+Exp -> Exp BINOP Exp
+Exp -> ID
+Exp -> NUM
+Exp -> INC ID
+Exp -> ID ID
+Exp -> DEC ID
+Exp -> ID Dec
+
