@@ -12,6 +12,8 @@
 
 #define IS_BINOP(c) (c == '+' || c == '-' || c == '/' || c =='*')
 
+
+
 LexicalAnalyzer::LexicalAnalyzer(const TerminalTokens &terminalTokens) {
     this->terminalTokens = terminalTokens;
 }
@@ -183,6 +185,19 @@ bool LexicalAnalyzer::syntaxCheck(Assignment &assignment) {
     _buildParenthesesIndex(assignment);
     for (auto pair : parentheses) {
         std::cout << pair.first << "," << pair.second << std::endl;
+    }
+    for (auto ritr = parentheses.rbegin(); ritr != parentheses.rend(); ritr++) {
+        int left = ritr->first;
+        int right;
+        for (right = left + 1; right < assignment.size(); right++) {
+            if (IS_TOKEN(assignment[right], RPAREN)) break;
+        }
+        if (right >= assignment.size()) throw LexicalAnalyzerException("Syntax Error!");
+        _buildExpressionWithoutParen(assignment, left + 1, right);
+        auto new_token = ExpressionFactory::makeParenthesesExpressionToken(assignment[left + 1]);
+        assignment.insert(assignment.begin() + left, new_token);
+        assignment.erase(assignment.begin() + left + 1, assignment.begin() + left + 4);
+
     }
 
     _buildExpressionWithoutParen(assignment, 2, assignment.size());

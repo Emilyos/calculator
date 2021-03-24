@@ -30,6 +30,8 @@ public:
     static Token *makeNumExpressionToken(Token *token);
 
     static Token *makeBinOpExpressionToken(Token *lhs, Token *op, Token *rhs);
+
+    static Token *makeParenthesesExpressionToken(Token *token);
 };
 
 

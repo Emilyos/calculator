@@ -17,7 +17,7 @@
 typedef std::vector<Token *> ExpTokens;
 
 typedef enum {
-    PARENTHESES = 0, Unary, MUL_DIV, ADD_SUB
+    PARENTHESES = 0, Unary, MUL_DIV, ADD_SUB, NUM_ID
 } Priorities;
 
 class ExpressionException : public std::exception {

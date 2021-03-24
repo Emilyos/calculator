@@ -31,15 +31,29 @@ void Expression::setVariable(const std::string &var_name, int value) {
 }
 
 
-IdExpression::IdExpression(ExpTokens &tokens) : Expression(tokens) {}
+IdExpression::IdExpression(ExpTokens &tokens) : Expression(tokens) {
+    priority = Priorities::NUM_ID;
+}
 
-NumExpression::NumExpression(ExpTokens &tokens) : Expression(tokens) {}
+NumExpression::NumExpression(ExpTokens &tokens) : Expression(tokens) {
+    priority = Priorities::NUM_ID;
+}
 
-BinOpExpression::BinOpExpression(ExpTokens &tokens) : Expression(tokens) {}
+BinOpExpression::BinOpExpression(ExpTokens &tokens) : Expression(tokens) {
+    if (tokens[1]->getId().compare("+") == 0 || tokens[1]->getId().compare("-") == 0) {
+        priority = Priorities::ADD_SUB;
+    } else {
+        priority = Priorities::MUL_DIV;
+    }
+}
 
-UnaryExpression::UnaryExpression(ExpTokens &tokens, UnaryType type) : Expression(tokens), unaryType(type) {}
+UnaryExpression::UnaryExpression(ExpTokens &tokens, UnaryType type) : Expression(tokens), unaryType(type) {
+    priority = Priorities::Unary;
+}
 
-ParenthesesExpression::ParenthesesExpression(ExpTokens &tokens) : Expression(tokens) {}
+ParenthesesExpression::ParenthesesExpression(ExpTokens &tokens) : Expression(tokens) {
+    priority = Priorities::PARENTHESES;
+}
 
 
 int IdExpression::evaluate() {
@@ -56,6 +70,11 @@ int NumExpression::evaluate() {
 int BinOpExpression::evaluate() {
     auto *lhs = (Expression *) tokensList[0]->getData();
     auto *rhs = (Expression *) tokensList[2]->getData();
+    if (lhs->getPriority() > rhs->getPriority()) {
+        auto *tmp = lhs;
+        lhs = rhs;
+        rhs = tmp;
+    }
     switch (tokensList[1]->getId()[0]) {
         case '+':
             return lhs->evaluate() + rhs->evaluate();
