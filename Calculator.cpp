@@ -31,6 +31,10 @@ void Calculator::start() {
             return;
         }
         try {
+            if (next_line == "print") {
+                printVariables();
+                continue;
+            }
             Assignment next_assignment = lexicalAnalyzer.lexAnalyze(next_line);
             if (next_assignment.empty()) continue;
             lexicalAnalyzer.syntaxCheck(next_assignment);

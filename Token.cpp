@@ -34,7 +34,7 @@ Token::~Token() {
                 delete (Expression *) data;
                 break;
             case NUM:
-                delete (int *) data;
+                delete (double *) data;
                 break;
             default:
                 break;
@@ -50,7 +50,7 @@ std::ostream &operator<<(std::ostream &os, const Token &token) {
     if (token.type == ID && token.data != NULL) {
         os << "<ID," << *(std::string *) token.data << ">";
     } else if (token.type == NUM && token.data != NULL) {
-        os << "<NUM," << *(int *) token.data << ">";
+        os << "<NUM," << *(double *) token.data << ">";
     } else if (token.type == EXP && token.data != NULL) {
         os << "<EXP>";
     } else {

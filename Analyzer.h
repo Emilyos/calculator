@@ -31,7 +31,7 @@ public:
 class Analyzer {
 private:
     std::string ALPHA = {"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"};
-    std::string DIGITS = {"0123456789"};
+    std::string DIGITS = {"0123456789."};
     TerminalTokens terminalTokens;
 
     std::set<int> left_parentheses;

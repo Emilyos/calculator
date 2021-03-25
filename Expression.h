@@ -31,14 +31,14 @@ public:
 };
 
 class Expression {
-    static std::unordered_map<std::string, int> *var_map;
+    static std::unordered_map<std::string, double> *var_map;
 protected:
     ExpTokens tokensList;
     unsigned int priority;
 
-    int getVariable(const std::string &var_name);
+    double getVariable(const std::string &var_name);
 
-    void setVariable(const std::string &var_name, int value);
+    void setVariable(const std::string &var_name, double value);
 
 public:
 
@@ -48,11 +48,11 @@ public:
 
     virtual ~Expression();
 
-    virtual int evaluate() {
+    virtual double evaluate() {
         throw ExpressionException();
     }
 
-    static void setVariablesMap(std::unordered_map<std::string, int> *varMap);
+    static void setVariablesMap(std::unordered_map<std::string, double> *varMap);
 
 
 };
@@ -65,7 +65,7 @@ private:
 
 public:
 
-    int evaluate() override;
+    double evaluate() override;
 };
 
 class NumExpression : public Expression {
@@ -76,7 +76,7 @@ private:
 
 public:
 
-    int evaluate() override;
+    double evaluate() override;
 };
 
 class BinOpExpression : public Expression {
@@ -87,7 +87,7 @@ private:
 
 public:
 
-    int evaluate() override;
+    double evaluate() override;
 };
 
 class UnaryExpression : public Expression {
@@ -103,7 +103,7 @@ private:
     explicit UnaryExpression(ExpTokens &tokens, UnaryType type);
 
 public:
-    int evaluate() override;
+    double evaluate() override;
 };
 
 class ParenthesesExpression : public Expression {
@@ -113,7 +113,7 @@ private:
 public:
     explicit ParenthesesExpression(ExpTokens &tokens);
 
-    int evaluate() override;
+    double evaluate() override;
 };
 
 #endif //CALCULATOR_EXPRESSION_H

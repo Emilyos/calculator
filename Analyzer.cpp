@@ -61,7 +61,7 @@ void Analyzer::_getTokensFrom(const std::string &word, int start, std::vector<To
         }
         unsigned int id_size = ((len - start) == 1) || start == pos ? 1 : (pos - start);
         auto substr = word.substr(start, id_size);
-        void *data = type == ID ? (void *) new std::string(substr) : new int(std::stoi(substr));
+        void *data = type == ID ? (void *) new std::string(substr) : new double(std::stod(substr));
         auto *new_token = new Token(type);
         new_token->setData(data);
         next_pos = pos;

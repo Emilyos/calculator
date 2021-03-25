@@ -4,7 +4,7 @@
 
 #include "Expression.h"
 
-std::unordered_map<std::string, int> *Expression::var_map;
+std::unordered_map<std::string, double> *Expression::var_map;
 
 Expression::Expression(ExpTokens &tokens) : tokensList(tokens) {}
 
@@ -12,12 +12,12 @@ unsigned int Expression::getPriority() const {
     return priority;
 }
 
-void Expression::setVariablesMap(std::unordered_map<std::string, int> *varMap) {
+void Expression::setVariablesMap(std::unordered_map<std::string, double> *varMap) {
     Expression::var_map = varMap;
 }
 
 
-int Expression::getVariable(const std::string &var_name) {
+double Expression::getVariable(const std::string &var_name) {
     auto itr = Expression::var_map->find(var_name);
     if (itr == Expression::var_map->end()) {
         throw ExpressionException("Variable " + var_name + " does not exist!");
@@ -25,9 +25,8 @@ int Expression::getVariable(const std::string &var_name) {
     return itr->second;
 }
 
-void Expression::setVariable(const std::string &var_name, int value) {
+void Expression::setVariable(const std::string &var_name, double value) {
     (*Expression::var_map)[var_name] = value;
-//    Expression::var_map->insert(std::make_pair(var_name, value));
 }
 
 Expression::~Expression() {
@@ -65,44 +64,52 @@ ParenthesesExpression::ParenthesesExpression(ExpTokens &tokens) : Expression(tok
 }
 
 
-int IdExpression::evaluate() {
+double IdExpression::evaluate() {
     Token *token = tokensList[0];
     auto var_name = *(std::string *) token->getData();
     return getVariable(var_name);
 }
 
-int NumExpression::evaluate() {
+double NumExpression::evaluate() {
     Token *token = tokensList[0];
-    return *(int *) token->getData();
+    return *(double *) token->getData();
 }
 
-int BinOpExpression::evaluate() {
-    auto *lhs = (Expression *) tokensList[0]->getData();
-    auto *rhs = (Expression *) tokensList[2]->getData();
-    if (lhs->getPriority() > rhs->getPriority()) {
-        auto *tmp = lhs;
-        lhs = rhs;
-        rhs = tmp;
+double BinOpExpression::evaluate() {
+    auto *left_exp = (Expression *) tokensList[0]->getData();
+    auto *right_exp = (Expression *) tokensList[2]->getData();
+    double lhs, rhs;
+    if (left_exp->getPriority() > right_exp->getPriority()) { // lower val -> higher priority
+        // right side first:
+        rhs = right_exp->evaluate();
+        lhs = left_exp->evaluate();
+    } else {
+        // left side first
+        lhs = left_exp->evaluate();
+        rhs = right_exp->evaluate();
     }
     switch (tokensList[1]->getId()[0]) {
         case '+':
-            return lhs->evaluate() + rhs->evaluate();
+            return lhs + rhs;
         case '*':
-            return lhs->evaluate() * rhs->evaluate();
+            return lhs * rhs;
         case '-':
-            return lhs->evaluate() - rhs->evaluate();
+            return lhs - rhs;
         case '/':
-            return lhs->evaluate() / rhs->evaluate();
+            if (rhs == 0) {
+                throw ExpressionException("Divide by zero!!!!!!!");
+            }
+            return lhs / rhs;
         default:
-            throw ExpressionException();
+            throw ExpressionException("Unknown operator!");
     }
 }
 
 
-int UnaryExpression::evaluate() {
+double UnaryExpression::evaluate() {
     Token *id;
     std::string var_name;
-    int return_val, new_val;
+    double return_val, new_val;
     switch (unaryType) {
         case INC_ID:
             id = tokensList[1];
@@ -133,7 +140,7 @@ int UnaryExpression::evaluate() {
     return return_val;
 }
 
-int ParenthesesExpression::evaluate() {
+double ParenthesesExpression::evaluate() {
     auto exp = (Expression *) tokensList[1]->getData();
     return exp->evaluate();
 }

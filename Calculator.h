@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include "Expression.h"
 
-typedef std::unordered_map<std::string, int> Variables;
+typedef std::unordered_map<std::string, double> Variables;
 
 class Calculator {
     std::string calc_name;
