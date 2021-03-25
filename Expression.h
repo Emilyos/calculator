@@ -96,7 +96,7 @@ private:
 
 
     typedef enum {
-        INC_ID, ID_INC, DEC_ID, ID_DEC
+        INC_ID, ID_INC, DEC_ID, ID_DEC, NEG
     } UnaryType;
     UnaryType unaryType;
 

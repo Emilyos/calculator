@@ -8,14 +8,13 @@
 
 
 Token *ExpressionFactory::makeUnaryExpressionToken(Token *first, Token *second) {
-    if ((!IS_TOKEN(first, ID) && !IS_TOKEN(second, ID))) {
-        throw ExpressionFactoryException("Invalid arguments!");
-    }
     UnaryExpression::UnaryType type;
-    if (DEC_OR_INC(first)) {
+    if (DEC_OR_INC(first) && IS_TOKEN(second, ID)) {
         type = IS_TOKEN(first, INC) ? UnaryExpression::UnaryType::INC_ID : UnaryExpression::UnaryType::DEC_ID;
-    } else if (DEC_OR_INC(second)) {
+    } else if (DEC_OR_INC(second) && IS_TOKEN(first, ID)) {
         type = IS_TOKEN(second, INC) ? UnaryExpression::UnaryType::ID_INC : UnaryExpression::UnaryType::ID_DEC;
+    } else if (IS_TOKEN(first, BINOP) && IS_TOKEN(second, EXP) && first->getId() == "-") {
+        type = UnaryExpression::UnaryType::NEG;
     } else {
         throw ExpressionFactoryException("Invalid arguments!");
     }

@@ -111,6 +111,9 @@ double UnaryExpression::evaluate() {
     std::string var_name;
     double return_val, new_val;
     switch (unaryType) {
+        case NEG:
+            id = tokensList[1];
+            return -(((Expression *) id->getData())->evaluate());
         case INC_ID:
             id = tokensList[1];
             var_name = *(std::string *) id->getData();
@@ -135,6 +138,7 @@ double UnaryExpression::evaluate() {
             return_val = getVariable(var_name);
             new_val = return_val - 1;
             break;
+
     }
     setVariable(var_name, new_val);
     return return_val;
@@ -144,3 +148,4 @@ double ParenthesesExpression::evaluate() {
     auto exp = (Expression *) tokensList[1]->getData();
     return exp->evaluate();
 }
+

@@ -12,9 +12,8 @@
 #define IS_TOKEN(token, type) ((token) != NULL && (token)->getType() == TokenType::type)
 
 
-
 typedef enum {
-    NUM, ID, ASSIGN, INC, DEC, BINOP, LPAREN, RPAREN, EXP
+    NUM, ID, ASSIGN, INC, DEC, BINOP, LPAREN, RPAREN, EXP, UNKNOWN
 } TokenType;
 
 class TokenInvalidOperationException : std::exception {

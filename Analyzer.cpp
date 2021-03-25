@@ -161,7 +161,29 @@ void Analyzer::_buildExpressionWithoutParen(Assignment &assignment, int start, i
                                                    : ExpressionFactory::makeNumExpressionToken(token);
             assignment.insert(assignment.begin() + i, new_token);
             assignment.erase(assignment.begin() + i + 1);
+        } else if (IS_TOKEN(token, ASSIGN)) {
+            throw LexicalAnalyzerException("Synatx Error!");
         }
+    }
+    // build negative
+    TokenType last_type = assignment[start - 1]->getType();
+    int i = start;
+    while (i < end) {
+        auto current_type = assignment[i]->getType();
+        if (current_type == BINOP && (last_type == BINOP || last_type == ASSIGN || last_type == LPAREN)) {
+            if (assignment[i]->getId() != "-" || i + 1 >= end || !IS_TOKEN(assignment[i + 1], EXP)) {
+                throw LexicalAnalyzerException("Syntax Error!");
+            }
+            auto new_token = ExpressionFactory::makeUnaryExpressionToken(assignment[i], assignment[i + 1]);
+            assignment.insert(assignment.begin() + i, new_token);
+            assignment.erase(assignment.begin() + i + 1, assignment.begin() + i + 3);
+            end--;
+            last_type = EXP;
+        } else {
+            last_type = current_type;
+        }
+        i++;
+
     }
     // now we should be able to reduce Exp -> Exp BINOP Exp only.
     int tmp_end = end;
